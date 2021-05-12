@@ -50,9 +50,7 @@ func (s *Server) virusTotalHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 
-	var reader io.Reader
-
-	reader = r.Body
+	var reader io.Reader = r.Body
 
 	result, err := vt.Scan(filename, reader)
 	if err != nil {
