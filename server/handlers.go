@@ -539,7 +539,7 @@ func resolveKey(key, proxyPath string) string {
 	return key
 }
 
-func resolveWebAddress(r *http.Request, proxyPath string, proxyPort string) string {
+func resolveWebAddress(r *http.Request, proxyPath, proxyPort string) string {
 	url := getURL(r, proxyPort)
 
 	var webAddress string
