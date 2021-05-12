@@ -35,7 +35,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	blackfriday "github.com/russross/blackfriday/v2"
 	"html"
 	html_template "html/template"
 	"io"
@@ -54,9 +53,12 @@ import (
 	text_template "text/template"
 	"time"
 
+	blackfriday "github.com/russross/blackfriday/v2"
+
 	"net"
 
 	"encoding/base64"
+
 	web "github.com/dutchcoders/transfer.sh-web"
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
@@ -423,9 +425,7 @@ func (s *Server) putHandler(w http.ResponseWriter, r *http.Request) {
 	if contentLength == -1 {
 		// queue file to disk, because s3 needs content length
 		var err error
-		var f io.Reader
-
-		f = reader
+		var f io.Reader = reader
 
 		var b bytes.Buffer
 

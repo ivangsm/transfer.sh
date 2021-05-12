@@ -49,9 +49,7 @@ func (s *Server) scanHandler(w http.ResponseWriter, r *http.Request) {
 
 	s.logger.Printf("Scanning %s %d %s", filename, contentLength, contentType)
 
-	var reader io.Reader
-
-	reader = r.Body
+	var reader io.Reader = r.Body
 
 	c := clamd.NewClamd(s.ClamAVDaemonHost)
 
