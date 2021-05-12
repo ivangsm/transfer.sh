@@ -544,7 +544,7 @@ func resolveWebAddress(r *http.Request, proxyPath, proxyPort string) string {
 
 	var webAddress string
 
-	if len(proxyPath) == 0 {
+	if proxyPath == "" {
 		webAddress = fmt.Sprintf("%s://%s/",
 			url.ResolveReference(url).Scheme,
 			url.ResolveReference(url).Host)
@@ -589,10 +589,10 @@ func getURL(r *http.Request, proxyPort string) *url.URL {
 			host = r.Host
 			port = ""
 		}
-		if len(proxyPort) != 0 {
+		if proxyPort != "" {
 			port = proxyPort
 		}
-		if len(port) == 0 {
+		if port == "" {
 			u.Host = host
 		} else {
 			if port == "80" && u.Scheme == "http" {
