@@ -73,7 +73,7 @@ var (
 )
 
 func stripPrefix(path string) string {
-	return strings.Replace(path, web.Prefix+"/", "", -1)
+	return strings.ReplaceAll(path, web.Prefix+"/", "")
 }
 
 func initTextTemplates() *text_template.Template {
@@ -534,7 +534,7 @@ func resolveKey(key, proxyPath string) string {
 		key = key[len(proxyPath):]
 	}
 
-	key = strings.Replace(key, "\\", "/", -1)
+	key = strings.ReplaceAll(key, "\\", "/")
 
 	return key
 }
