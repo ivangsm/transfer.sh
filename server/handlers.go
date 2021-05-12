@@ -1089,7 +1089,7 @@ func IPFilterHandler(h http.Handler, ipFilterOptions *IPFilterOptions) http.Hand
 		} else {
 			WrapIPFilter(h, *ipFilterOptions).ServeHTTP(w, r)
 		}
-		return
+
 	}
 }
 
