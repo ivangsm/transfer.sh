@@ -53,7 +53,7 @@ func (s *LocalStorage) Type() string {
 	return "local"
 }
 
-func (s *LocalStorage) Head(token string, filename string) (contentLength uint64, err error) {
+func (s *LocalStorage) Head(token, filename string) (contentLength uint64, err error) {
 	path := filepath.Join(s.basedir, token, filename)
 
 	var fi os.FileInfo
@@ -66,7 +66,7 @@ func (s *LocalStorage) Head(token string, filename string) (contentLength uint64
 	return
 }
 
-func (s *LocalStorage) Get(token string, filename string) (reader io.ReadCloser, contentLength uint64, err error) {
+func (s *LocalStorage) Get(token, filename string) (reader io.ReadCloser, contentLength uint64, err error) {
 	path := filepath.Join(s.basedir, token, filename)
 
 	// content type , content length
@@ -122,7 +122,7 @@ func (s *LocalStorage) IsNotExist(err error) bool {
 	return os.IsNotExist(err)
 }
 
-func (s *LocalStorage) Put(token string, filename string, reader io.Reader, contentType string, contentLength uint64) error {
+func (s *LocalStorage) Put(token, filename string, reader io.Reader, contentType string, contentLength uint64) error {
 	var f io.WriteCloser
 	var err error
 
@@ -155,7 +155,7 @@ type S3Storage struct {
 	noMultipart bool
 }
 
-func NewS3Storage(accessKey, secretKey, bucketName string, purgeDays int, region, endpoint string, disableMultipart bool, forcePathStyle bool, logger *log.Logger) (*S3Storage, error) {
+func NewS3Storage(accessKey, secretKey, bucketName string, purgeDays int, region, endpoint string, disableMultipart, forcePathStyle bool, logger *log.Logger) (*S3Storage, error) {
 	sess := getAwsSession(accessKey, secretKey, region, endpoint, forcePathStyle)
 
 	return &S3Storage{
@@ -172,7 +172,7 @@ func (s *S3Storage) Type() string {
 	return "s3"
 }
 
-func (s *S3Storage) Head(token string, filename string) (contentLength uint64, err error) {
+func (s *S3Storage) Head(token, filename string) (contentLength uint64, err error) {
 	key := fmt.Sprintf("%s/%s", token, filename)
 
 	headRequest := &s3.HeadObjectInput{
@@ -213,7 +213,7 @@ func (s *S3Storage) IsNotExist(err error) bool {
 	return false
 }
 
-func (s *S3Storage) Get(token string, filename string) (reader io.ReadCloser, contentLength uint64, err error) {
+func (s *S3Storage) Get(token, filename string) (reader io.ReadCloser, contentLength uint64, err error) {
 	key := fmt.Sprintf("%s/%s", token, filename)
 
 	getRequest := &s3.GetObjectInput{
@@ -234,7 +234,7 @@ func (s *S3Storage) Get(token string, filename string) (reader io.ReadCloser, co
 	return
 }
 
-func (s *S3Storage) Delete(token string, filename string) (err error) {
+func (s *S3Storage) Delete(token, filename string) (err error) {
 	metadata := fmt.Sprintf("%s/%s.metadata", token, filename)
 	deleteRequest := &s3.DeleteObjectInput{
 		Bucket: aws.String(s.bucket),
@@ -257,7 +257,7 @@ func (s *S3Storage) Delete(token string, filename string) (err error) {
 	return
 }
 
-func (s *S3Storage) Put(token string, filename string, reader io.Reader, contentType string, contentLength uint64) (err error) {
+func (s *S3Storage) Put(token, filename string, reader io.Reader, contentType string, contentLength uint64) (err error) {
 	key := fmt.Sprintf("%s/%s", token, filename)
 
 	s.logger.Printf("Uploading file %s to S3 Bucket", filename)
@@ -293,7 +293,7 @@ type GDrive struct {
 	logger          *log.Logger
 }
 
-func NewGDriveStorage(clientJsonFilepath string, localConfigPath string, basedir string, chunkSize int, logger *log.Logger) (*GDrive, error) {
+func NewGDriveStorage(clientJsonFilepath, localConfigPath, basedir string, chunkSize int, logger *log.Logger) (*GDrive, error) {
 	b, err := ioutil.ReadFile(clientJsonFilepath)
 	if err != nil {
 		return nil, err
@@ -360,11 +360,11 @@ func (s *GDrive) hasChecksum(f *drive.File) bool {
 	return f.Md5Checksum != ""
 }
 
-func (s *GDrive) list(nextPageToken string, q string) (*drive.FileList, error) {
+func (s *GDrive) list(nextPageToken, q string) (*drive.FileList, error) {
 	return s.service.Files.List().Fields("nextPageToken, files(id, name, mimeType)").Q(q).PageToken(nextPageToken).Do()
 }
 
-func (s *GDrive) findId(filename string, token string) (string, error) {
+func (s *GDrive) findId(filename, token string) (string, error) {
 	filename = strings.Replace(filename, `'`, `\'`, -1)
 	filename = strings.Replace(filename, `"`, `\"`, -1)
 
@@ -426,7 +426,7 @@ func (s *GDrive) Type() string {
 	return "gdrive"
 }
 
-func (s *GDrive) Head(token string, filename string) (contentLength uint64, err error) {
+func (s *GDrive) Head(token, filename string) (contentLength uint64, err error) {
 	var fileId string
 	fileId, err = s.findId(filename, token)
 	if err != nil {
@@ -443,7 +443,7 @@ func (s *GDrive) Head(token string, filename string) (contentLength uint64, err 
 	return
 }
 
-func (s *GDrive) Get(token string, filename string) (reader io.ReadCloser, contentLength uint64, err error) {
+func (s *GDrive) Get(token, filename string) (reader io.ReadCloser, contentLength uint64, err error) {
 	var fileId string
 	fileId, err = s.findId(filename, token)
 	if err != nil {
@@ -523,7 +523,7 @@ func (s *GDrive) IsNotExist(err error) bool {
 	return false
 }
 
-func (s *GDrive) Put(token string, filename string, reader io.Reader, contentType string, contentLength uint64) error {
+func (s *GDrive) Put(token, filename string, reader io.Reader, contentType string, contentLength uint64) error {
 	dirId, err := s.findId("", token)
 	if err != nil {
 		return err
@@ -657,7 +657,7 @@ func (s *StorjStorage) Type() string {
 	return "storj"
 }
 
-func (s *StorjStorage) Head(token string, filename string) (contentLength uint64, err error) {
+func (s *StorjStorage) Head(token, filename string) (contentLength uint64, err error) {
 	key := storj.JoinPaths(token, filename)
 
 	ctx := context.TODO()
@@ -672,7 +672,7 @@ func (s *StorjStorage) Head(token string, filename string) (contentLength uint64
 	return
 }
 
-func (s *StorjStorage) Get(token string, filename string) (reader io.ReadCloser, contentLength uint64, err error) {
+func (s *StorjStorage) Get(token, filename string) (reader io.ReadCloser, contentLength uint64, err error) {
 	key := storj.JoinPaths(token, filename)
 
 	s.logger.Printf("Getting file %s from Storj Bucket", filename)
@@ -690,7 +690,7 @@ func (s *StorjStorage) Get(token string, filename string) (reader io.ReadCloser,
 	return
 }
 
-func (s *StorjStorage) Delete(token string, filename string) (err error) {
+func (s *StorjStorage) Delete(token, filename string) (err error) {
 	key := storj.JoinPaths(token, filename)
 
 	s.logger.Printf("Deleting file %s from Storj Bucket", filename)
@@ -707,7 +707,7 @@ func (s *StorjStorage) Purge(days time.Duration) (err error) {
 	return nil
 }
 
-func (s *StorjStorage) Put(token string, filename string, reader io.Reader, contentType string, contentLength uint64) (err error) {
+func (s *StorjStorage) Put(token, filename string, reader io.Reader, contentType string, contentLength uint64) (err error) {
 	key := storj.JoinPaths(token, filename)
 
 	s.logger.Printf("Uploading file %s to Storj Bucket", filename)
