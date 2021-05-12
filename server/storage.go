@@ -4,6 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -14,14 +23,6 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/googleapi"
-	"io"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
 
 	"storj.io/common/storj"
 	"storj.io/uplink"
@@ -83,7 +84,7 @@ func (s *LocalStorage) Get(token string, filename string) (reader io.ReadCloser,
 	return
 }
 
-func (s *LocalStorage) Delete(token string, filename string) (err error) {
+func (s *LocalStorage) Delete(token, filename string) (err error) {
 	metadata := filepath.Join(s.basedir, token, fmt.Sprintf("%s.metadata", filename))
 	os.Remove(metadata)
 
@@ -470,7 +471,7 @@ func (s *GDrive) Get(token string, filename string) (reader io.ReadCloser, conte
 	return
 }
 
-func (s *GDrive) Delete(token string, filename string) (err error) {
+func (s *GDrive) Delete(token, filename string) (err error) {
 	metadata, _ := s.findId(fmt.Sprintf("%s.metadata", filename), token)
 	s.service.Files.Delete(metadata).Do()
 
