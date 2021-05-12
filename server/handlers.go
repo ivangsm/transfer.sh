@@ -612,7 +612,7 @@ func (metadata Metadata) remainingLimitHeaderValues() (remainingDownloads, remai
 	if metadata.MaxDate.IsZero() {
 		remainingDays = "n/a"
 	} else {
-		timeDifference := metadata.MaxDate.Sub(time.Now())
+		timeDifference := time.Until(metadata.MaxDate)
 		remainingDays = strconv.Itoa(int(timeDifference.Hours()/24) + 1)
 	}
 
